@@ -68,6 +68,7 @@ function runDetection() {
         let box_y_center = predictions[i].bbox[1] + predictions[i].bbox[3] / 2
 
         console.log("open center x " + box_x_center + " center y " + box_y_center)
+        sendPosition(box_x_center,box_y_center) 
       }
       // call function to send to raspberry pi (box_x_center, box_y_center)
     }
@@ -77,6 +78,20 @@ function runDetection() {
       requestAnimationFrame(runDetection);
     }
   });
+}
+
+function sendPosition(x,y){
+  let url='http://172.18.152.109:5000/position?x='+x+"&&y="+y
+  var httpRequest = new XMLHttpRequest();
+      httpRequest.open('GET', url, true);
+      httpRequest.send();
+     
+  httpRequest.onreadystatechange = function () {
+      if (httpRequest.readyState == 4 && httpRequest.status == 200) {
+          var json = httpRequest.responseText;
+          console.log(json);
+      }
+  };
 }
 
 function runDetectionImage(img) {
