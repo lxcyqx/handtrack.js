@@ -10,9 +10,6 @@ let imgindex = 1;
 let isVideo = false;
 let model = null;
 
-// video.width = 500
-// video.height = 400
-
 const modelParams = {
   flipHorizontal: true, // flip e.g for video
   maxNumBoxes: 20, // maximum number of boxes to detect
@@ -66,9 +63,13 @@ function runDetection() {
   model.detect(video).then((predictions) => {
     console.log("Predictions: ", predictions);
     for (let i = 0; i < predictions.length; i++){
-      let box_x_center = predictions[i].bbox[0] + predictions[i].bbox[2] / 2
-      let box_y_center = predictions[i].bbox[1] + predictions[i].bbox[3] / 2
-      console.log("center x " + box_x_center + " center y " + box_y_center)
+      if (predictions[i].class == 1){
+        let box_x_center = predictions[i].bbox[0] + predictions[i].bbox[2] / 2
+        let box_y_center = predictions[i].bbox[1] + predictions[i].bbox[3] / 2
+
+        console.log("open center x " + box_x_center + " center y " + box_y_center)
+      }
+      // call function to send to raspberry pi (box_x_center, box_y_center)
     }
 
     model.renderPredictions(predictions, canvas, context, video);

@@ -64,7 +64,6 @@ const modelOutputNodes = [
 
 export async function load(params) {
   let modelParams = Object.assign({}, defaultParams, params);
-  // console.log(modelParams)
   const objectDetection = new ObjectDetection(modelParams);
   await objectDetection.load();
   return objectDetection;
@@ -142,18 +141,14 @@ export class ObjectDetection {
     this.model = await loadGraphModel(this.modelPath);
     // Warmup the model.
     const dummyInput = tf.zeros([1, 300, 300, 3], "int32");
-    // this.model.executeAsync(dummyInput).then((result) => {
-    //   tf.dispose(result);
-    //   tf.dispose(dummyInput);
-    // });
     const result = await this.model.executeAsync(dummyInput);
     result.map(async (t) => await t.data());
     result.map(async (t) => t.dispose());
     tf.dispose(dummyInput);
-    // console.log(tf.memory());
   }
 
   async detect(input) {
+    console.log("in detect")
     let timeBegin = Date.now();
     const [height, width] = getInputTensorDimensions(input);
     const resizedHeight = getValidResolution(
@@ -172,7 +167,6 @@ export class ObjectDetection {
       if (this.modelParams.flipHorizontal) {
         return (
           imageTensor
-            //   .transpose([0, 1, 2])
             .reverse(1)
             .resizeBilinear([resizedHeight, resizedWidth])
             .expandDims(0)
@@ -181,7 +175,6 @@ export class ObjectDetection {
       } else {
         return (
           imageTensor
-            //   .transpose([0, 1, 2])
             .resizeBilinear([resizedHeight, resizedWidth])
             .expandDims(0)
             .toInt()
@@ -256,12 +249,16 @@ export class ObjectDetection {
       bbox[2] = maxX - minX;
       bbox[3] = maxY - minY;
       const detectionClass = Math.round(classes[indexes[i]]) + 1;
-      objects.push({
-        bbox: bbox,
-        class: detectionClass,
-        label: this.modelParams.labelMap[detectionClass],
-        score: scores[indexes[i]].toFixed(2),
-      });
+
+      console.log(detectionClass)
+      if (detectionClass == 1){
+        objects.push({
+          bbox: bbox,
+          class: detectionClass,
+          label: this.modelParams.labelMap[detectionClass],
+          score: scores[indexes[i]].toFixed(2),
+        });
+      }
     }
     return objects;
   }
@@ -321,12 +318,10 @@ export class ObjectDetection {
     context.clearRect(0, 0, canvas.width, canvas.height);
     canvas.width = mediasource.width;
     canvas.height = mediasource.height;
-    // console.log("render", mediasource.width, mediasource.height);
     canvas.style.height =
       parseInt(canvas.style.width) *
         (mediasource.height / mediasource.width).toFixed(2) +
       "px";
-    // console.log("render", canvas.style.width, canvas.style.height);
 
     context.save();
     if (this.modelParams.flipHorizontal) {
@@ -337,7 +332,6 @@ export class ObjectDetection {
     context.restore();
     context.font = "bold " + this.modelParams.fontSize + "px Arial";
 
-    // console.log('number of detections: ', predictions.length);
     for (let i = 0; i < predictions.length; i++) {
       const pred = predictions[i];
       context.beginPath();
@@ -350,7 +344,6 @@ export class ObjectDetection {
         this.modelParams.fontSize * 1.5
       );
       context.lineWidth = this.modelParams.bboxLineWidth;
-      // context.rect(...pred.bbox);
       this.roundRect(
         context,
         pred.bbox[0],
@@ -364,7 +357,6 @@ export class ObjectDetection {
 
       // draw a dot at the center of bounding box
 
-      // context.lineWidth = 1;
       context.strokeStyle = colorMap[pred.label];
       context.fillStyle = colorMap[pred.label];
       context.fillRect(
@@ -385,7 +377,6 @@ export class ObjectDetection {
     // FPS background
     context.fillStyle = "rgba(255, 255, 255, 0.6)";
 
-    // context.fillRect(5, 5, 80, 24);
     this.roundRect(
       context,
       10,
@@ -397,7 +388,6 @@ export class ObjectDetection {
       false
     );
     // Write FPS to top left
-    // context.stroke();
     context.strokeStyle = "#374151";
     context.fillStyle = "#374151";
     context.font = "bold " + this.modelParams.fontSize + "px Arial";
