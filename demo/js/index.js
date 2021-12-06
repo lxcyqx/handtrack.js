@@ -59,7 +59,12 @@ function nextImage() {
   }, 500);
 }
 
+var start = Date.now()
+var end = Date.now()
+var delta = 0
+
 function runDetection() {
+  delta = Date.now() - start;
   model.detect(video).then((predictions) => {
     console.log("Predictions: ", predictions);
     for (let i = 0; i < predictions.length; i++){
@@ -68,7 +73,10 @@ function runDetection() {
         let box_y_center = predictions[i].bbox[1] + predictions[i].bbox[3] / 2
 
         console.log("open center x " + box_x_center + " center y " + box_y_center)
-        sendPosition(box_x_center,box_y_center) 
+        if (delta > 700){
+          sendPosition(box_x_center, box_y_center) 
+          start = Date.now()
+        }
       }
       // call function to send to raspberry pi (box_x_center, box_y_center)
     }
@@ -81,7 +89,7 @@ function runDetection() {
 }
 
 function sendPosition(x,y){
-  let url='http://172.18.152.109:5000/position?x='+x+"&&y="+y
+  let url='http://172.18.139.99:5000/position?x='+x+"&&y="+y
   var httpRequest = new XMLHttpRequest();
       httpRequest.open('GET', url, true);
       httpRequest.send();
