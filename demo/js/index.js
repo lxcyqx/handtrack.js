@@ -53,7 +53,6 @@ trackButton.addEventListener("click", function () {
 function nextImage() {
   imgindex++;
   handimg.src = "images/" + (imgindex % 9) + ".jpg";
-  // alert(handimg.src)
   setTimeout(() => {
     runDetectionImage(handimg);
   }, 500);
@@ -78,7 +77,6 @@ function runDetection() {
           start = Date.now()
         }
       }
-      // call function to send to raspberry pi (box_x_center, box_y_center)
     }
 
     model.renderPredictions(predictions, canvas, context, video);
