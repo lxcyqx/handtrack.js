@@ -58,12 +58,22 @@ function nextImage() {
   }, 500);
 }
 
+function getRandom(min, max) { // min and max included 
+  return Math.random() * (max - min + 1) + min
+}
+
 var start = Date.now()
 var end = Date.now()
 var delta = 0
 
 function runDetection() {
   delta = Date.now() - start;
+  if (delta > 20000) { 
+    x = getRandom(120, 520)
+    y = getRandom(40, 440)
+    sendPosition(x, y)
+  }
+
   model.detect(video).then((predictions) => {
     console.log("Predictions: ", predictions);
     for (let i = 0; i < predictions.length; i++){
@@ -72,7 +82,7 @@ function runDetection() {
         let box_y_center = predictions[i].bbox[1] + predictions[i].bbox[3] / 2
 
         console.log("open center x " + box_x_center + " center y " + box_y_center)
-        if (delta > 700){
+        if (delta > 200){
           sendPosition(box_x_center, box_y_center) 
           start = Date.now()
         }
