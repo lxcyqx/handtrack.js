@@ -66,20 +66,42 @@ var start = Date.now()
 var end = Date.now()
 var delta = 0
 
+var count = 0
+let notes = ["C", "D", "E", "F", "G", "A", "B"];
+let octaves = ["2", "3", "4", "5", "6", "7"];
+synth = new Tone.Synth().toMaster();
+let oldnoteoctave = "";
+divX = 640/notes.length;
+divY = 480/octaves.length
+
 function runDetection() {
+  count++
+  console.log(count)
+
+
   delta = Date.now() - start;
-  if (delta > 20000) { 
-    x = getRandom(120, 520)
-    y = getRandom(40, 440)
-    sendPosition(x, y)
-  }
+  // if (delta > 20000) { 
+  //   x = getRandom(120, 520)
+  //   y = getRandom(40, 440)
+  //   sendPosition(x, y)
+  // }
 
   model.detect(video).then((predictions) => {
     console.log("Predictions: ", predictions);
     for (let i = 0; i < predictions.length; i++){
       if (predictions[i].class == 1){
+
         let box_x_center = predictions[i].bbox[0] + predictions[i].bbox[2] / 2
         let box_y_center = predictions[i].bbox[1] + predictions[i].bbox[3] / 2
+
+        let note = Math.round((box_x_center + (divX / 2)) / divX) - 1
+        let octave = Math.round((box_y_center + (divX / 2)) / divX) - 1;
+        let newnoteoctave = notes[note] + octaves[octave];
+        if (oldnoteoctave != newnoteoctave) {
+          oldnoteoctave = newnoteoctave;
+          synth.triggerRelease();
+          synth.triggerAttack(newnoteoctave);
+        }
 
         console.log("open center x " + box_x_center + " center y " + box_y_center)
         if (delta > 200){
