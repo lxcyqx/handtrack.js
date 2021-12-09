@@ -101,6 +101,8 @@ function runDetection() {
           oldnoteoctave = newnoteoctave;
           synth.triggerRelease();
           synth.triggerAttack(newnoteoctave);
+        } else {
+          synth.triggerRelease();
         }
 
         console.log("open center x " + box_x_center + " center y " + box_y_center)
